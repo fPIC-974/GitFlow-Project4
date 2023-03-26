@@ -12,6 +12,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
+import java.util.Date;
 
 public class TicketDAO {
 
@@ -110,4 +111,24 @@ public class TicketDAO {
         }
         return nbTickets;
     }
+
+    // FPIC-974 - update IN_TIME in db, testing purpose
+    public boolean updateInTime(Ticket ticket) {
+        Connection con = null;
+        try {
+            long inTime = ticket.getInTime().getTime() - (60 * 60 * 1000);
+            con = dataBaseConfig.getConnection();
+            PreparedStatement ps = con.prepareStatement(DBConstants.UPDATE_INTIME);
+            ps.setTimestamp(1, new Timestamp(inTime));
+            ps.setInt(2,ticket.getId());
+            ps.execute();
+            return true;
+        }catch (Exception ex){
+            logger.error("Error saving ticket info",ex);
+        }finally {
+            dataBaseConfig.closeConnection(con);
+        }
+        return false;
+    }
+
 }
