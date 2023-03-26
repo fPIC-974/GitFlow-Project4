@@ -18,6 +18,11 @@ public class FareCalculatorService {
         // FPIC-974 - Convert duration to hours
         double duration = (outHour - inHour) / 3600000;
 
+        // FPIC-974 - Free parking for less than 30mn
+        if (duration <= 0.5) {
+            duration = 0;
+        }
+
         switch (ticket.getParkingSpot().getParkingType()){
             case CAR: {
                 ticket.setPrice(duration * Fare.CAR_RATE_PER_HOUR);
