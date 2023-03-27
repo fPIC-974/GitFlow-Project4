@@ -1,0 +1,13 @@
+/Users/fpicard/OpenClassrooms/Testing/Project-4/GitFlow/parkingsystem/src/main/java/com/parkit/parkingsystem/model/ParkingSpot.java
+/Users/fpicard/OpenClassrooms/Testing/Project-4/GitFlow/parkingsystem/src/main/java/com/parkit/parkingsystem/constants/Fare.java
+/Users/fpicard/OpenClassrooms/Testing/Project-4/GitFlow/parkingsystem/src/main/java/com/parkit/parkingsystem/service/InteractiveShell.java
+/Users/fpicard/OpenClassrooms/Testing/Project-4/GitFlow/parkingsystem/src/main/java/com/parkit/parkingsystem/constants/ParkingType.java
+/Users/fpicard/OpenClassrooms/Testing/Project-4/GitFlow/parkingsystem/src/main/java/com/parkit/parkingsystem/constants/DBConstants.java
+/Users/fpicard/OpenClassrooms/Testing/Project-4/GitFlow/parkingsystem/src/main/java/com/parkit/parkingsystem/config/DataBaseConfig.java
+/Users/fpicard/OpenClassrooms/Testing/Project-4/GitFlow/parkingsystem/src/main/java/com/parkit/parkingsystem/service/ParkingService.java
+/Users/fpicard/OpenClassrooms/Testing/Project-4/GitFlow/parkingsystem/src/main/java/com/parkit/parkingsystem/dao/ParkingSpotDAO.java
+/Users/fpicard/OpenClassrooms/Testing/Project-4/GitFlow/parkingsystem/src/main/java/com/parkit/parkingsystem/service/FareCalculatorService.java
+/Users/fpicard/OpenClassrooms/Testing/Project-4/GitFlow/parkingsystem/src/main/java/com/parkit/parkingsystem/dao/TicketDAO.java
+/Users/fpicard/OpenClassrooms/Testing/Project-4/GitFlow/parkingsystem/src/main/java/com/parkit/parkingsystem/App.java
+/Users/fpicard/OpenClassrooms/Testing/Project-4/GitFlow/parkingsystem/src/main/java/com/parkit/parkingsystem/model/Ticket.java
+/Users/fpicard/OpenClassrooms/Testing/Project-4/GitFlow/parkingsystem/src/main/java/com/parkit/parkingsystem/util/InputReaderUtil.java

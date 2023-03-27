@@ -12,6 +12,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
+import java.util.Date;
 
 public class TicketDAO {
 
@@ -86,4 +87,48 @@ public class TicketDAO {
         }
         return false;
     }
+
+    // FPIC-974 -
+    public int getNbTicket(String vehicleRegNumber) {
+        Connection con = null;
+        int nbTickets = 0;
+
+        try {
+            con = dataBaseConfig.getConnection();
+            PreparedStatement ps = con.prepareStatement(DBConstants.GET_NB_TICKET);
+
+            ps.setString(1,vehicleRegNumber);
+            ResultSet rs = ps.executeQuery();
+            if(rs.next()){
+                nbTickets = rs.getInt(1);
+            }
+            dataBaseConfig.closeResultSet(rs);
+            dataBaseConfig.closePreparedStatement(ps);
+        }catch (Exception ex){
+            logger.error("Error fetching number of tickets",ex);
+        }finally {
+            dataBaseConfig.closeConnection(con);
+        }
+        return nbTickets;
+    }
+
+    // FPIC-974 - update IN_TIME in db, testing purpose
+    public boolean updateInTime(Ticket ticket) {
+        Connection con = null;
+        try {
+            long inTime = ticket.getInTime().getTime() - (60 * 60 * 1000);
+            con = dataBaseConfig.getConnection();
+            PreparedStatement ps = con.prepareStatement(DBConstants.UPDATE_INTIME);
+            ps.setTimestamp(1, new Timestamp(inTime));
+            ps.setInt(2,ticket.getId());
+            ps.execute();
+            return true;
+        }catch (Exception ex){
+            logger.error("Error saving ticket info",ex);
+        }finally {
+            dataBaseConfig.closeConnection(con);
+        }
+        return false;
+    }
+
 }

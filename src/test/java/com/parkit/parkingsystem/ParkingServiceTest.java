@@ -17,6 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Date;
 
 import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
 public class ParkingServiceTest {
@@ -31,7 +32,7 @@ public class ParkingServiceTest {
     private static TicketDAO ticketDAO;
 
     @BeforeEach
-    private void setUpPerTest() {
+    public void setUpPerTest() {
         try {
             when(inputReaderUtil.readVehicleRegistrationNumber()).thenReturn("ABCDEF");
 
@@ -54,8 +55,102 @@ public class ParkingServiceTest {
 
     @Test
     public void processExitingVehicleTest(){
+        //FareCalculatorService fareCalculatorService = mock(FareCalculatorService.class);
+        when(ticketDAO.getNbTicket("ABCDEF")).thenReturn(0);
         parkingService.processExitingVehicle();
+
+        // FPIC-974 - Alternative - fareCalculatorService not seen as invoked
+
+        //verify(fareCalculatorService).calculateFare(any(Ticket.class));
         verify(parkingSpotDAO, Mockito.times(1)).updateParking(any(ParkingSpot.class));
     }
 
+    @Test
+    public void testProcessIncomingVehicle() {
+        reset(ticketDAO);
+        when(inputReaderUtil.readSelection()).thenReturn(1);
+        when(ticketDAO.getNbTicket(anyString())).thenReturn(0);
+        when(parkingSpotDAO.getNextAvailableSlot(any(ParkingType.class))).thenReturn(1);
+
+        parkingService.processIncomingVehicle();
+
+        verify(parkingSpotDAO).updateParking(any(ParkingSpot.class));
+        verify(ticketDAO).saveTicket(any(Ticket.class));
+    }
+
+    @Test
+    public void processExitingVehicleTestUnableUpdate() {
+        // Setting test case values
+        when(ticketDAO.getNbTicket(anyString())).thenReturn(0);
+        when(ticketDAO.updateTicket(any(Ticket.class))).thenReturn(false);
+
+        // Call method to test
+        parkingService.processExitingVehicle();
+
+        // Verification method
+        verifyNoInteractions(parkingSpotDAO);
+
+        reset(ticketDAO);
+        reset(parkingSpotDAO);
+    }
+
+    @Test
+    public void testGetNextParkingNumberIfAvailable() {
+        // Setting test case values
+        when(inputReaderUtil.readSelection()).thenReturn(1);
+        when(ticketDAO.getNbTicket(anyString())).thenReturn(0);
+        when(parkingSpotDAO.getNextAvailableSlot(any(ParkingType.class))).thenReturn(1);
+
+        // Call method to test
+        ParkingSpot toCheck = parkingService.getNextParkingNumberIfAvailable();
+
+        // Assert method
+        assertEquals(1, toCheck.getId());
+
+        reset(inputReaderUtil);
+        reset(parkingSpotDAO);
+        reset(ticketDAO);
+    }
+
+    @Test
+    public void testGetNextParkingNumberIfAvailableParkingNumberNotFound() {
+        // Setting test case values
+        when(inputReaderUtil.readSelection()).thenReturn(1);
+        when(ticketDAO.getNbTicket(anyString())).thenReturn(0);
+        when(parkingSpotDAO.getNextAvailableSlot(any(ParkingType.class))).thenReturn(0);
+
+        // Call method to test
+        ParkingSpot toCheck = parkingService.getNextParkingNumberIfAvailable();
+
+        // Assert method
+        assertNull(toCheck);
+
+        // FPIC-974 - Alternative using assertions
+/*        Exception exception = Assertions.assertThrows(Exception.class,
+                () -> parkingService.getNextParkingNumberIfAvailable());
+        Assertions.assertEquals(
+                "Error fetching parking number from DB. Parking slots might be full", exception.getMessage());*/
+
+        reset(inputReaderUtil);
+        reset(parkingSpotDAO);
+        reset(ticketDAO);
+    }
+
+    @Test
+    public void testGetNextParkingNumberIfAvailableParkingNumberWrongArgument() {
+        // Setting test case values
+        when(inputReaderUtil.readSelection()).thenReturn(3);
+        when(ticketDAO.getNbTicket(anyString())).thenReturn(0);
+
+        // Call method to test
+        ParkingSpot toCheck = parkingService.getNextParkingNumberIfAvailable();
+
+        // Verification method
+        verifyNoInteractions(parkingSpotDAO);
+        assertNull(toCheck);
+
+        reset(inputReaderUtil);
+        reset(ticketDAO);
+        reset(parkingSpotDAO);
+    }
 }

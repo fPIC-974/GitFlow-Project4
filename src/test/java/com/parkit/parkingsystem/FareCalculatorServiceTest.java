@@ -19,12 +19,12 @@ public class FareCalculatorServiceTest {
     private Ticket ticket;
 
     @BeforeAll
-    private static void setUp() {
+    public static void setUp() {
         fareCalculatorService = new FareCalculatorService();
     }
 
     @BeforeEach
-    private void setUpPerTest() {
+    public void setUpPerTest() {
         ticket = new Ticket();
     }
 
@@ -57,7 +57,7 @@ public class FareCalculatorServiceTest {
     }
 
     @Test
-    public void calculateFareUnkownType(){
+    public void calculateFareUnknownType(){
         Date inTime = new Date();
         inTime.setTime( System.currentTimeMillis() - (  60 * 60 * 1000) );
         Date outTime = new Date();
@@ -124,4 +124,84 @@ public class FareCalculatorServiceTest {
         assertEquals( (24 * Fare.CAR_RATE_PER_HOUR) , ticket.getPrice());
     }
 
+    // FPIC-974 - Testing less than 30mn free parking
+    // Could use @ParameterizedTest with enum ParkingType to minimize code
+    @Test
+    public void calculateFareCarWithLessThan30minutesParkingTime() {
+        // Setting test case values
+        Date inTime = new Date();
+        inTime.setTime(System.currentTimeMillis() - (25 * 50 * 1000)); // 25mn parking should give 0 parking fare
+        Date outTime = new Date();
+
+        ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.CAR, false);
+
+        ticket.setInTime(inTime);
+        ticket.setOutTime(outTime);
+        ticket.setParkingSpot(parkingSpot);
+
+        // Call method to test
+        fareCalculatorService.calculateFare(ticket);
+
+        // Assert value
+        assertEquals(0, ticket.getPrice());
+    }
+
+    @Test
+    public void calculateFareBikeWithLessThan30minutesParkingTime() {
+        // Setting test case values
+        Date inTime = new Date();
+        inTime.setTime(System.currentTimeMillis() - (25 * 50 * 1000)); // 25mn parking should give 0 parking fare
+        Date outTime = new Date();
+
+        ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.BIKE, false);
+
+        ticket.setInTime(inTime);
+        ticket.setOutTime(outTime);
+        ticket.setParkingSpot(parkingSpot);
+
+        // Call method to test
+        fareCalculatorService.calculateFare(ticket);
+
+        // Assert value
+        assertEquals(0, ticket.getPrice());
+    }
+
+    // FPIC-974 - Testing 5% discount
+    @Test
+    public void calculateFareCarWithDiscount() {
+        // Setting test case values
+        Date inTime = new Date();
+        inTime.setTime( System.currentTimeMillis() - (  60 * 60 * 1000) );
+        Date outTime = new Date();
+        ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.CAR,false);
+
+        ticket.setInTime(inTime);
+        ticket.setOutTime(outTime);
+        ticket.setParkingSpot(parkingSpot);
+
+        // Call method to test
+        fareCalculatorService.calculateFare(ticket, true);
+
+        // Assert value
+        assertEquals(0.95 * Fare.CAR_RATE_PER_HOUR, ticket.getPrice());
+    }
+
+    @Test
+    public void calculateFareBikeWithDiscount() {
+        // Setting test case values
+        Date inTime = new Date();
+        inTime.setTime( System.currentTimeMillis() - (  60 * 60 * 1000) );
+        Date outTime = new Date();
+        ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.BIKE,false);
+
+        ticket.setInTime(inTime);
+        ticket.setOutTime(outTime);
+        ticket.setParkingSpot(parkingSpot);
+
+        // Call method to test
+        fareCalculatorService.calculateFare(ticket, true);
+
+        // Assert value
+        assertEquals(0.95 * Fare.BIKE_RATE_PER_HOUR, ticket.getPrice());
+    }
 }
