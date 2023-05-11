@@ -33,6 +33,15 @@ public class ParkingService {
             if(parkingSpot !=null && parkingSpot.getId() > 0){
                 String vehicleRegNumber = getVehicleRegNumber();
 
+                // FPIC-974 - Vehicle already in ?
+                // FIXME tests not working
+                Ticket testTicket = ticketDAO.getTicket(vehicleRegNumber);
+//                if (ticketDAO.getTicket(vehicleRegNumber).getOutTime() == null) {
+                if (testTicket != null && testTicket.getOutTime() == null) {
+                    System.out.println("Error processing new vehicle : already in");
+                    throw new Exception("Error processing new vehicle : already in");
+                }
+
                 // FPIC-974 - Recurring user ?
                 if (ticketDAO.getNbTicket(vehicleRegNumber) > 0) {
                     System.out.println(
@@ -109,6 +118,11 @@ public class ParkingService {
         try{
             String vehicleRegNumber = getVehicleRegNumber();
             Ticket ticket = ticketDAO.getTicket(vehicleRegNumber);
+
+            if (ticket == null || ticket.getOutTime() != null) {
+                throw new RuntimeException("Vehicle is not currently in");
+            }
+
             Date outTime = new Date();
             ticket.setOutTime(outTime);
 

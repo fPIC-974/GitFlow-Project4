@@ -7,6 +7,7 @@ import com.parkit.parkingsystem.model.ParkingSpot;
 import com.parkit.parkingsystem.model.Ticket;
 import com.parkit.parkingsystem.service.ParkingService;
 import com.parkit.parkingsystem.util.InputReaderUtil;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -39,6 +40,7 @@ public class ParkingServiceTest {
             ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.CAR,false);
             Ticket ticket = new Ticket();
             ticket.setInTime(new Date(System.currentTimeMillis() - (60*60*1000)));
+            ticket.setInTime(new Date(System.currentTimeMillis()));
             ticket.setParkingSpot(parkingSpot);
             ticket.setVehicleRegNumber("ABCDEF");
             when(ticketDAO.getTicket(anyString())).thenReturn(ticket);
@@ -66,16 +68,17 @@ public class ParkingServiceTest {
     }
 
     @Test
-    public void testProcessIncomingVehicle() {
-        reset(ticketDAO);
+    public void testProcessIncomingVehicle() throws Exception {
         when(inputReaderUtil.readSelection()).thenReturn(1);
+        Ticket ticket = ticketDAO.getTicket("ABCDEF");
+        ticket.setOutTime(new Date(System.currentTimeMillis()));
         when(ticketDAO.getNbTicket(anyString())).thenReturn(0);
         when(parkingSpotDAO.getNextAvailableSlot(any(ParkingType.class))).thenReturn(1);
-
         parkingService.processIncomingVehicle();
 
         verify(parkingSpotDAO).updateParking(any(ParkingSpot.class));
         verify(ticketDAO).saveTicket(any(Ticket.class));
+        reset(ticketDAO);
     }
 
     @Test
@@ -150,6 +153,18 @@ public class ParkingServiceTest {
         assertNull(toCheck);
 
         reset(inputReaderUtil);
+        reset(ticketDAO);
+        reset(parkingSpotDAO);
+    }
+
+    @Test
+    public void testIncomingVehicleAlreadyIn() {
+        when(inputReaderUtil.readSelection()).thenReturn(1);
+        when(parkingSpotDAO.getNextAvailableSlot(any(ParkingType.class))).thenReturn(1);
+
+        parkingService.processIncomingVehicle();
+
+        verifyNoMoreInteractions(parkingSpotDAO);
         reset(ticketDAO);
         reset(parkingSpotDAO);
     }
